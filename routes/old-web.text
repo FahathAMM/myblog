@@ -1,0 +1,87 @@
+<?php
+
+use App\Models\Category;
+use App\Models\Post;
+use App\Models\User;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+ */
+
+// Route::get('/', function () {
+
+//     return view('welcome');
+
+// });
+
+Route::get('/', function () {
+    $posts = Post::latest();
+    if (request('search')) {
+        $posts->where('title', 'Like', '%' . request('search') . '%')
+            ->where('body', 'Like', '%' . request('search') . '%');
+    }
+
+    return view('welcome', [
+        // 'posts' => Post::all(),
+        // 'posts'      => Post::latest()->get(),
+        'posts'      => $posts->get(),
+        'categories' => Category::all(),
+    ]);
+})->name('home');
+
+Route::get('single/{post:slug}', function (Post $post) { // Post::where('slug',$post)-first()orfirstorfail();
+    //    ddd($post);
+    return view('single', [
+        'post' => $post,
+    ]);
+});
+
+Route::get('Categories/{Category:slug}', function (Category $Category) { // Category::where('id',$Category)-first()orfirstorfail();
+    // ddd($Category);
+    return view('welcome', [
+        'posts'           => $Category->posts,
+        'currentcategory' => $Category,
+        'categories'      => Category::all(),
+    ]);
+});
+
+Route::get('authors/{author:name}', function (User $author) { // User::where('id',$Category)-first()orfirstorfail();
+    // ddd($author->posts);
+    return view('welcome', [
+        'posts' => $author->posts,
+    ]);
+});
+
+//?=============================================================
+
+//!practical some tips
+
+// Route::get('/single/{id}', function ($id) {
+//     return view('single', [
+//         'post' => Post::find($id),
+//     ]);
+// });
+
+// Route::get('single/{post}', function (Post $post) {
+//     //    ddd($post);
+//         return view('single', [
+//             'post' =>$post,
+//         ]);
+//     });
+
+// Route::get('Categories/{Category:slug}', function (Category $Category) {   // Category::where('slug',$Category)-first()orfirstorfail();
+//     //ddd($Category->posts->id);
+//     return view('welcome', [
+//         'posts' => $Category->posts->load(['category','author']),
+//     ]);
+// });
+
+//?=============================================================
